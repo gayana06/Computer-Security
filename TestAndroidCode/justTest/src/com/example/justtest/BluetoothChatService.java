@@ -68,8 +68,7 @@ public class BluetoothChatService {
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
     
-    //gayana
-    BluetoothChatService b=null;
+
     /**
      * Constructor. Prepares a new BluetoothChat session.
      * @param context  The UI Activity Context
@@ -79,7 +78,7 @@ public class BluetoothChatService {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
-        b=this;
+        
         
     }
 
@@ -461,12 +460,6 @@ public class BluetoothChatService {
                     // Send the obtained bytes to the UI Activity
                     mHandler.obtainMessage(BluetoothChat.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
-                    //gayana
-                   // String msg=new String(buffer);
-                   // msg="Why you send "+msg;
-                   // byte[] send = msg.getBytes();
-                   // b.write(send);
-                    //gayana
                     
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);

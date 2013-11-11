@@ -12,6 +12,7 @@ using InTheHand.Net.Bluetooth;
 using InTheHand.Net.Ports;
 using InTheHand.Net.Sockets;
 using System.IO;
+using System.Security.Cryptography;
 
 
 
@@ -20,11 +21,27 @@ namespace Bluetooth_Tutorial
     public partial class Form1 : Form
     {
 
+        private String sessionKey;
+        private String passwordHash = "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8";
+
+        private const String MSG_USERNAME="UN";
+        private const String MSG_SEP_COLON=":";
+        private const String MSG_AUTHENTICATED="ATD";
+        private const String MSG_CHALLENGE="CH";
+        private const String MSG_CHALLENGE_REPLY="CHR";
+        private const String MSG_SESSION_KEY_GET="GSK";
+        private const String MSG_SESSION_KEY_REPLY="RSK";
+
+        private int index = 0;
+        private string[] expectedSequence = new string[] { MSG_USERNAME, MSG_SESSION_KEY_REPLY, MSG_CHALLENGE_REPLY };
+        private long challengeValue;
+        Random rand;
         List<string> items;
         public Form1()
         {
             items = new List<string>();
             InitializeComponent();
+            rand = new Random();
         }
 
         private void bGo_Click(object sender, EventArgs e)
@@ -91,7 +108,7 @@ namespace Bluetooth_Tutorial
             blueListener.Start();
             BluetoothClient conn = blueListener.AcceptBluetoothClient();
             updateUI("Client has connected");
-
+            index = 0;
             Stream mStream = conn.GetStream();
             while (true)
             {
@@ -99,17 +116,159 @@ namespace Bluetooth_Tutorial
                 {
                     //handle server connection
                     byte[] received = new byte[1024];
+                   
                     mStream.Read(received, 0, received.Length);
                     updateUI("Received: " + Encoding.ASCII.GetString(received));
-                    byte[] sent = Encoding.ASCII.GetBytes("Hello World");
-                    mStream.Write(sent, 0, sent.Length);
+
+                    string reply = ProcessInput(Encoding.ASCII.GetString(Decode(received)));
+                    if (reply != null)
+                    {
+                        byte[] sent = Encoding.ASCII.GetBytes(reply);
+                        mStream.Write(sent, 0, sent.Length);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 catch (IOException exception)
                 {
                     updateUI("Client has disconnected!!!!");
+                    break;
                 }
             }
 
+        }
+
+        public byte[] Decode(byte[] packet)
+        {
+            var i = packet.Length - 1;
+            while (packet[i] == 0)
+            {
+                --i;
+            }
+            var temp = new byte[i + 1];
+            Array.Copy(packet, temp, i + 1);
+           // MessageBox.Show(temp.Length.ToString());
+            return temp;
+        }
+
+        public string ProcessInput(String message)
+        {
+            string reply = null;
+            try
+            {
+                string decryptedMessage;
+
+                if (index == 0)
+                {
+                    decryptedMessage = Crypto.Decrypt(message, passwordHash);
+                    updateUI("Decrypted Message: " + decryptedMessage);
+                    if (decryptedMessage.StartsWith(expectedSequence[index] + MSG_SEP_COLON))
+                    {
+                        GenerateSessionKey();
+                        reply = MSG_SESSION_KEY_GET + MSG_SEP_COLON + sessionKey + MSG_SEP_COLON + GetChallengeValue();
+                        reply = Crypto.Encrypt(reply, passwordHash);
+                        IncrementIndex();
+                    }
+                    else
+                    {
+                        //disconnect
+                        //Authentication fail message
+                    }
+                }
+                else if (index == 1)
+                {
+                    decryptedMessage = Crypto.Decrypt(message, sessionKey);
+                    updateUI("Decrypted Message: " + decryptedMessage);
+                    if (decryptedMessage.StartsWith(expectedSequence[index] + MSG_SEP_COLON))
+                    {
+                        bool isValidReply = CheckResponse(decryptedMessage.Split(MSG_SEP_COLON.ToCharArray())[1]);
+                        if (isValidReply)
+                        {
+                            reply = MSG_AUTHENTICATED + MSG_SEP_COLON + GetChallengeValue();
+                            reply = Crypto.Encrypt(reply, sessionKey);
+                            IncrementIndex();
+                        }
+                        else
+                        {
+                            //disconnect
+                            //Authentication fail message
+                        }
+                    }
+                    else
+                    {
+                        //disconnect
+                        //Authentication fail message
+                    }
+                }
+                else if (index == 2)
+                {
+                    decryptedMessage = Crypto.Decrypt(message, sessionKey);
+                    updateUI("Decrypted Message: " + decryptedMessage);
+                    if (decryptedMessage.StartsWith(expectedSequence[index] + MSG_SEP_COLON))
+                    {
+                        bool isValidReply = CheckResponse(decryptedMessage.Split(MSG_SEP_COLON.ToCharArray())[1]);
+                        if (isValidReply)
+                        {
+                            Thread.Sleep(5000);
+                            reply = MSG_CHALLENGE + MSG_SEP_COLON + GetChallengeValue();
+                            reply = Crypto.Encrypt(reply, sessionKey);
+                        }
+                        else
+                        {
+                            //disconnect
+                            //decrypt folder
+                        }
+                    }
+                    else
+                    {
+                        //disconnect
+                        //decrypt folder
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                updateUI("Wrong password");
+            }
+            return reply;
+
+        }
+
+        public bool CheckResponse(string response)
+        {
+            long tmp = long.Parse(response);
+            if (tmp == (challengeValue + 1))
+                return true;
+            else
+                return false;
+        }
+
+        public void IncrementIndex()
+        {
+            if (index < 3)
+                index++;
+
+        }
+
+        private void GenerateSessionKey()
+        {
+            string guid = new Guid().ToString();
+            this.sessionKey=CalculateSHA1(guid,Encoding.ASCII);
+        }
+
+        public  string CalculateSHA1(string text, Encoding enc)
+        {
+            byte[] buffer = enc.GetBytes(text);
+            SHA1CryptoServiceProvider cryptoTransformSHA1 = new SHA1CryptoServiceProvider();
+            return BitConverter.ToString(cryptoTransformSHA1.ComputeHash(buffer)).Replace("-", "");
+        }
+
+        public long GetChallengeValue()
+        {
+            challengeValue = rand.Next(1000000, Int32.MaxValue);
+            return challengeValue;
         }
 
         private void updateUI(string message)

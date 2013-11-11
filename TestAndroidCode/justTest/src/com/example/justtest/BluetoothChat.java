@@ -16,15 +16,33 @@
 
 package com.example.justtest;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 import android.R.string;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -69,7 +87,26 @@ public class BluetoothChat extends Activity  {
     private ListView mConversationView;
     private EditText mOutEditText;
     private Button mSendButton;
-
+    
+    //gayana
+    private Button mConnect;
+    private Button mDisconnect;
+    private String userName;
+    private String passwordHash;
+    TextView viewuname;
+    TextView viewpwd;
+    private String sessionKey;
+	private final String characterEncoding = "UTF-8";
+    private final String cipherTransformation = "AES/CBC/PKCS5Padding";
+    private final String aesEncryptionAlgorithm = "AES";
+    private final String MSG_USERNAME="UN";
+    private final String MSG_SEP_COLON=":";
+    private final String MSG_AUTHENTICATED="ATD";
+    private final String MSG_CHALLENGE="CH";
+    private final String MSG_CHALLENGE_REPLY="CHR";
+    private final String MSG_SESSION_KEY_GET="GSK";
+    private final String MSG_SESSION_KEY_REPLY="RSK";
+    
     // Name of the connected device
     private String mConnectedDeviceName = null;
     // Array adapter for the conversation thread
@@ -144,6 +181,8 @@ public class BluetoothChat extends Activity  {
         mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
         mConversationView = (ListView) findViewById(R.id.in);
         mConversationView.setAdapter(mConversationArrayAdapter);
+        
+              
 
         // Initialize the compose field with a listener for the return key
         mOutEditText = (EditText) findViewById(R.id.edit_text_out);
@@ -159,6 +198,28 @@ public class BluetoothChat extends Activity  {
                 sendMessage(message);
             }
         });
+        
+        //gayana
+        mOutEditText.setVisibility(View.GONE);
+        mSendButton.setVisibility(View.GONE);
+        mConversationView.setVisibility(View.GONE);
+        mConnect=(Button)findViewById(R.id.button_connect);
+        mConnect.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                // Send a message using content of the edit text widget
+            	Connect();
+            }
+        });
+        mDisconnect=(Button)findViewById(R.id.button_disconnect);
+        mDisconnect.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                // Send a message using content of the edit text widget                
+               Disconnect();
+            }
+        });
+        mConnect.setVisibility(View.VISIBLE);
+        mDisconnect.setVisibility(View.GONE);
+        
         
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(this, mHandler);
@@ -224,24 +285,7 @@ public class BluetoothChat extends Activity  {
         }
     }
     
-    private  void sendMessage1(String message) {
-        // Check that we're actually connected before trying anything
-        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
-            Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        // Check that there's actually something to send
-        if (message.length() > 0) {
-            // Get the message bytes and tell the BluetoothChatService to write
-            byte[] send = message.getBytes();
-            mChatService.write(send);
-
-            // Reset out string buffer to zero and clear the edit text field
-            mOutStringBuffer.setLength(0);
-            mOutEditText.setText(mOutStringBuffer);
-        }
-    }
 
     // The action listener for the EditText widget, to listen for the return key
     private TextView.OnEditorActionListener mWriteListener =
@@ -300,7 +344,7 @@ public class BluetoothChat extends Activity  {
                 // construct a string from the valid bytes in the buffer
                 String readMessage = new String(readBuf, 0, msg.arg1);
                 mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);  
-                sendMessage1("HaHaHa.. "+readMessage);
+                ProcessServerCall(readMessage);
                 break;
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
@@ -382,6 +426,218 @@ public class BluetoothChat extends Activity  {
             return true;
         }
         return false;
+    }
+    
+    //gayana
+    private Boolean IsConnectedToServer()
+    {    
+    	Boolean isConnected=false;
+    	if (mChatService.getState() == BluetoothChatService.STATE_CONNECTED)
+    	{
+    		isConnected=true;
+    	} 
+    	return isConnected;
+    }
+    
+    private void Connect()
+    {
+    	try
+    	{
+	    	if(IsConnectedToServer())
+	    	{
+	    		sessionKey=null;
+		        viewuname = (TextView) findViewById(R.id.edit_username);
+		        viewpwd = (TextView) findViewById(R.id.edit_password);
+		        String username = viewuname.getText().toString();                
+		        String password = viewpwd.getText().toString();
+		        passwordHash= GetSHAHash(password);
+		        String encryptedText=encrypt(MSG_USERNAME+MSG_SEP_COLON+ username, passwordHash);
+		        sendMessage(encryptedText);		        
+		        viewuname.setEnabled(false);
+		        viewpwd.setEnabled(false);
+		        mConnect.setVisibility(View.GONE);
+		        mDisconnect.setVisibility(View.VISIBLE);		        
+	    	}
+	    	else
+	    	{
+	    		 Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
+	    		 UpdateMessage("Device not connected");
+	    	}
+    	}
+    	catch(Exception ex)
+    	{
+    		System.err.println(ex.getMessage());
+    	}
+        
+    }
+    
+    private void Disconnect()
+    {
+    	
+    	if(mChatService!=null)
+    		mChatService.stop();
+        mConnect.setVisibility(View.VISIBLE);
+        mDisconnect.setVisibility(View.GONE);
+        viewuname.setEnabled(true);
+        viewpwd.setEnabled(true);
+        UpdateMessage("Device disconnected");
+    }
+    
+    public  void ProcessServerCall(String message)
+    {
+    	try
+    	{
+	    	if(IsConnectedToServer() && message.length() > 0)
+	    	{
+	    		String decryptedMsg;
+	    		if(sessionKey!=null && sessionKey!="")
+	    			decryptedMsg=decrypt(message, sessionKey);
+	    		else
+	    			decryptedMsg=decrypt(message, passwordHash);
+	    		System.out.println("DECRYPTED MSG - "+decryptedMsg);
+	    		if(decryptedMsg.startsWith(MSG_SESSION_KEY_GET+MSG_SEP_COLON))
+	    		{
+	    			ProcessSessionKey(decryptedMsg.split(MSG_SEP_COLON)[1],decryptedMsg.split(MSG_SEP_COLON)[2]);
+	    			UpdateMessage("Authenticating....");
+	    		}
+	    		else if(decryptedMsg.startsWith(MSG_AUTHENTICATED+MSG_SEP_COLON))
+	    		{
+	    			UpdateMessage("Successfully Connected with "+mConnectedDeviceName);
+	    			ReplyChallenge(decryptedMsg.split(MSG_SEP_COLON)[1]);
+	    		}
+	    		else if(decryptedMsg.startsWith(MSG_CHALLENGE+MSG_SEP_COLON))
+	    		{
+	    			ReplyChallenge(decryptedMsg.split(MSG_SEP_COLON)[1]);
+	    		}
+	    		else
+	    		{
+	    			System.err.println("UNKNOWN MESSAGE FROM SERVER");
+	    			Disconnect();
+	    		}
+	    	}
+	    	else
+	    	{
+	    		 Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
+	    	}
+    	}
+    	catch(Exception ex)
+    	{
+    		System.err.println(ex.getMessage());
+    		Disconnect();
+    	}
+    }
+    
+    public void ProcessSessionKey(String sessionkey, String challenge) throws Exception
+    {
+    	this.sessionKey=sessionkey;
+    	long value=Long.parseLong(challenge);
+    	long replyvalue=value+1;
+    	String reply=encrypt(MSG_SESSION_KEY_REPLY+MSG_SEP_COLON+replyvalue, sessionKey);
+    	sendMessage(reply);
+    	System.out.println("SESSION_KEY_REPLY : "+reply);
+    	
+    }
+    
+    public void ReplyChallenge(String challengeText) throws Exception
+    {
+    	long value=Long.parseLong(challengeText);
+    	long replyvalue=value+1;
+    	String reply=encrypt(MSG_CHALLENGE_REPLY+MSG_SEP_COLON+replyvalue, sessionKey);
+    	sendMessage(reply);
+    	System.out.println("REPLY : "+reply);
+    	Toast.makeText(this, R.string.heart_beat, Toast.LENGTH_SHORT).show();
+    }
+        
+    public void UpdateMessage(String message)
+    {
+		TextView txtMessage=(TextView) findViewById(R.id.txt_message);
+		txtMessage.setText(message);
+    }
+    
+    private String GetSHAHash(String text)
+    {
+        String hash = null;
+        try
+        {
+        	MessageDigest md = MessageDigest.getInstance("SHA-1");
+            md.update(text.getBytes("iso-8859-1"), 0, text.length());
+            byte[] sha1hash = md.digest();
+            hash= convertToHex(sha1hash);
+            System.out.println("HASH - "+hash);
+        }
+        catch( NoSuchAlgorithmException e )
+        {
+            e.printStackTrace();
+        }
+        catch( UnsupportedEncodingException e )
+        {
+            e.printStackTrace();
+        }
+        return hash;
+    }
+    
+    private static String convertToHex(byte[] data) {
+        StringBuilder buf = new StringBuilder();
+        for (byte b : data) {
+            int halfbyte = (b >>> 4) & 0x0F;
+            int two_halfs = 0;
+            do {
+                buf.append((0 <= halfbyte) && (halfbyte <= 9) ? (char) ('0' + halfbyte) : (char) ('a' + (halfbyte - 10)));
+                halfbyte = b & 0x0F;
+            } while (two_halfs++ < 1);
+        }
+        return buf.toString();
+    }
+    
+    private byte[] getKeyBytes(String key) throws UnsupportedEncodingException{
+        byte[] keyBytes= new byte[16];
+        byte[] parameterKeyBytes= key.getBytes(characterEncoding);
+        System.arraycopy(parameterKeyBytes, 0, keyBytes, 0, Math.min(parameterKeyBytes.length, keyBytes.length));
+        return keyBytes;
+    }
+ 
+    public  byte[] decrypt(byte[] cipherText, byte[] key, byte [] initialVector) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
+    {
+        Cipher cipher = Cipher.getInstance(cipherTransformation);
+        SecretKeySpec secretKeySpecy = new SecretKeySpec(key, aesEncryptionAlgorithm);
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(initialVector);
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpecy, ivParameterSpec);
+        cipherText = cipher.doFinal(cipherText);
+        return cipherText;
+    }
+ 
+    public byte[] encrypt(byte[] plainText, byte[] key, byte [] initialVector) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
+    {
+        Cipher cipher = Cipher.getInstance(cipherTransformation);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, aesEncryptionAlgorithm);
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(initialVector);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+        plainText = cipher.doFinal(plainText);
+        return plainText;
+    }
+    
+    /// <summary>
+    /// Encrypts plaintext using AES 128bit key and a Chain Block Cipher and returns a base64 encoded string
+    /// </summary>
+    /// <param name="plainText">Plain text to encrypt</param>
+    /// <param name="key">Secret key</param>
+    /// <returns>Base64 encoded string</returns>
+    public String encrypt(String plainText, String key) throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException{
+        byte[] plainTextbytes = plainText.getBytes(characterEncoding);
+        byte[] keyBytes = getKeyBytes(key);
+        return Base64.encodeToString(encrypt(plainTextbytes,keyBytes, keyBytes), Base64.DEFAULT);
+    }
+ 
+    /// <summary>
+    /// Decrypts a base64 encoded string using the given key (AES 128bit key and a Chain Block Cipher)
+    /// </summary>
+    /// <param name="encryptedText">Base64 Encoded String</param>
+    /// <param name="key">Secret Key</param>
+    /// <returns>Decrypted String</returns>
+    public String decrypt(String encryptedText, String key) throws KeyException, GeneralSecurityException, GeneralSecurityException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, IOException{
+        byte[] cipheredBytes = Base64.decode(encryptedText, Base64.DEFAULT);
+        byte[] keyBytes = getKeyBytes(key);
+        return new String(decrypt(cipheredBytes, keyBytes, keyBytes), characterEncoding);
     }
 
 }

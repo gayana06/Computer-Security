@@ -18,5 +18,11 @@
     <string name="button_scan">Scan for devices</string>
     <string name="secure_connect">Connect a device - Secure</string>
     <string name="insecure_connect">Connect a device - Insecure</string>
-    <string name="discoverable">Make discoverable</string>    
+    <string name="discoverable">Make discoverable</string>  
+    <string name="username">Username :</string>
+    <string name="password">Password : </string> 
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>   
+    <string name="msg">TEXT</string> 
+    <string name="heart_beat">Sync with server</string> 
 </resources>
