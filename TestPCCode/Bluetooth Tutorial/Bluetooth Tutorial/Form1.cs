@@ -42,6 +42,7 @@ namespace Bluetooth_Tutorial
             items = new List<string>();
             InitializeComponent();
             rand = new Random();
+            Util.CreatePathDirectory();
         }
 
         private void bGo_Click(object sender, EventArgs e)
@@ -254,7 +255,7 @@ namespace Bluetooth_Tutorial
 
         private void GenerateSessionKey()
         {
-            string guid = new Guid().ToString();
+            string guid = Guid.NewGuid().ToString();
             this.sessionKey=CalculateSHA1(guid,Encoding.ASCII);
         }
 
@@ -366,6 +367,12 @@ namespace Bluetooth_Tutorial
                 ready = true;
                 tbText.Clear();
             }
+        }
+
+        private void btnRegister_Click(object sender, EventArgs e)
+        {
+            Register reg = new Register();
+            reg.Show();
         }
 
         

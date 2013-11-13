@@ -35,6 +35,7 @@
             this.rbServer = new System.Windows.Forms.RadioButton();
             this.rbClient = new System.Windows.Forms.RadioButton();
             this.bGo = new System.Windows.Forms.Button();
+            this.btnRegister = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -106,11 +107,22 @@
             this.bGo.UseVisualStyleBackColor = true;
             this.bGo.Click += new System.EventHandler(this.bGo_Click);
             // 
+            // btnRegister
+            // 
+            this.btnRegister.Location = new System.Drawing.Point(59, 272);
+            this.btnRegister.Name = "btnRegister";
+            this.btnRegister.Size = new System.Drawing.Size(75, 23);
+            this.btnRegister.TabIndex = 5;
+            this.btnRegister.Text = "Register";
+            this.btnRegister.UseVisualStyleBackColor = true;
+            this.btnRegister.Click += new System.EventHandler(this.btnRegister_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(908, 388);
+            this.Controls.Add(this.btnRegister);
             this.Controls.Add(this.bGo);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.listBox1);
@@ -134,6 +146,7 @@
         private System.Windows.Forms.RadioButton rbServer;
         private System.Windows.Forms.RadioButton rbClient;
         private System.Windows.Forms.Button bGo;
+        private System.Windows.Forms.Button btnRegister;
     }
 }
 
