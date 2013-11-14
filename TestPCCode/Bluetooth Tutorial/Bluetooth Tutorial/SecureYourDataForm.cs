@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+
 namespace Bluetooth_Tutorial
 {
     public partial class SecureYourDataForm : Form
@@ -19,6 +20,7 @@ namespace Bluetooth_Tutorial
         private User activeUser;
         private const String MSG_USERNAME = "UN";
         private const String MSG_SEP_COLON = ":";
+        private const char MSG_SEP_COLON_CHAR = ':';
         private const String MSG_AUTHENTICATED = "ATD";
         private const String MSG_CHALLENGE = "CH";
         private const String MSG_CHALLENGE_REPLY = "CHR";
@@ -29,6 +31,8 @@ namespace Bluetooth_Tutorial
         private string[] expectedSequence = new string[] { MSG_USERNAME, MSG_SESSION_KEY_REPLY, MSG_CHALLENGE_REPLY };
         private long challengeValue;
         private int challengePeriod = 5000; //in milliseconds
+        private int challengeReplyTimeOut = 5000;//in milliseconds
+        private bool isReplyTimeOut = false;
 
         public SecureYourDataForm()
         {
@@ -99,7 +103,7 @@ namespace Bluetooth_Tutorial
             };
             Invoke(del);
         }
-
+        
         private void ResetDisplay()
         {
             Func<int> del = delegate()
@@ -127,44 +131,73 @@ namespace Bluetooth_Tutorial
         /// </summary>
         public void ServerConnectThread()
         {
-            lblMainMsg.Text = "Waiting for a connection";
-            BluetoothListener blueListener = new BluetoothListener(ApplicationID);
-            blueListener.Start();
-            BluetoothClient connection = blueListener.AcceptBluetoothClient();
-            UpdateMainMessage("Client has connected");
-            UpdateDetails("Client has connected");
-            UpdateDeviceMessage(connection.RemoteMachineName);
-            index = 0;
-            Stream mStream = connection.GetStream();
+            BluetoothListener blueListener = new BluetoothListener(ApplicationID); ;
+            BluetoothClient connection = null;
+            Stream mStream = null;
+            System.Threading.Timer ticker=null;
             while (true)
             {
-                try
+                if (connection == null || !connection.Connected)
                 {
-                    //handle server connection
-                    byte[] received = new byte[1024];
-                    mStream.Read(received, 0, received.Length);
-                    UpdateDetails("Received: " + Encoding.ASCII.GetString(received));
-                    string reply = ProcessInput(Encoding.ASCII.GetString(Util.BufferFilter(received)));
-                    if (reply != null)
-                    {
-                        byte[] sent = Encoding.ASCII.GetBytes(reply);
-                        mStream.Write(sent, 0, sent.Length);
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    lblMainMsg.Text = "Waiting for a connection";
+                    isReplyTimeOut = false;
+                    blueListener.Start();
+                    connection = blueListener.AcceptBluetoothClient();
+                    UpdateMainMessage("Client has connected");
+                    UpdateDetails("Client has connected");
+                    UpdateDeviceMessage(connection.RemoteMachineName + " : " + connection.RemoteEndPoint.ToString());
+                    index = 0;
+                    mStream = connection.GetStream();
                 }
-                catch (IOException exception)
+                else
                 {
-                    UpdateDetails("Client has disconnected!!!!");
-                    ResetDisplay();
-                    RestartServer();
-                    UpdateDetails("Server restarted!!!!");
-                    break;
+                    try
+                    {
+                        //handle server connection
+                        byte[] received = new byte[1024];
+                        mStream.Read(received, 0, received.Length);
+                        if (isReplyTimeOut)
+                        {
+                            ticker.Dispose();
+                            throw new Exception();
+                        }
+                        else
+                        {
+                            if (ticker != null)
+                                ticker.Dispose();
+                        }
+                        UpdateDetails("Received: " + Encoding.ASCII.GetString(received));
+                        string reply = ProcessInput(Encoding.ASCII.GetString(Util.BufferFilter(received)));
+                        if (reply != null)
+                        {
+                            byte[] sent = Encoding.ASCII.GetBytes(reply);
+                            mStream.Write(sent, 0, sent.Length);
+                            ticker = new System.Threading.Timer(TimeOutReply, null, challengeReplyTimeOut, challengeReplyTimeOut);
+                        }
+                        else
+                        {
+                            throw new Exception();
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        //Log this situation
+                        UpdateDetails("Client has disconnected!!!!");
+                        ResetDisplay();
+                        connection.Close();
+                        blueListener.Stop();
+                        UpdateDetails("Server restarted!!!!");
+                    }
                 }
             }
 
+        }
+
+        public void TimeOutReply(object state)
+        {
+            isReplyTimeOut = true;
+            MessageBox.Show("Hit here");
+            //encrypt directory
         }
 
         public string ProcessInput(String message)
@@ -277,7 +310,7 @@ namespace Bluetooth_Tutorial
         /// </summary>
         public void IncrementIndex()
         {
-            if (index < 3)
+            if (index < 2)
                 index++;
 
         }
@@ -295,10 +328,12 @@ namespace Bluetooth_Tutorial
 
         /// <summary>
         /// Initial authentication cross checking with registered users
+        /// Message decryption with password hash 
+        /// Deprecated method
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public string InitialMessageProcess(string message)
+        public string InitialMessageProcess_Deprecated(string message)
         {
             List<User> userList = Util.LoadUserList();
             string decryptedMsg=string.Empty;
@@ -309,8 +344,16 @@ namespace Bluetooth_Tutorial
                     try
                     {
                         decryptedMsg = Crypto.Decrypt(message, user.PasswordHash);
-                        activeUser = user;
-                        break;
+                        string[] tmp = decryptedMsg.Split(MSG_SEP_COLON_CHAR);
+                        if (tmp[0] == MSG_USERNAME && tmp[1] == user.Username)
+                        {
+                            activeUser = user;
+                            break;
+                        }
+                        else
+                        {
+                            decryptedMsg = string.Empty;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -321,6 +364,38 @@ namespace Bluetooth_Tutorial
             return decryptedMsg;
         }
 
+
+        /// <summary>
+        /// Initial authentication cross checking with registered users
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public string InitialMessageProcess(string message)
+        {
+            List<User> userList = Util.LoadUserList();
+            bool isUserAvailable = false;
+            if (userList != null)
+            {
+                foreach (User user in userList)
+                {                    
+                    string[] tmp = message.Split(MSG_SEP_COLON_CHAR);
+                    if (tmp[0] == MSG_USERNAME && tmp[1] == user.Username)
+                    {
+                        activeUser = user;
+                        isUserAvailable = true;
+                        break;
+                    }
+                }
+            }
+            return isUserAvailable?message:string.Empty;
+        }
+
+
+        /// <summary>
+        /// Messages decryption with session key
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public string LatterMessageProcessing(string message)
         {
             string decryptedMsg = string.Empty;
@@ -342,6 +417,8 @@ namespace Bluetooth_Tutorial
         {
             this.sessionKey = Util.GenerateSessionKey();
         }
+
+
 
 
 

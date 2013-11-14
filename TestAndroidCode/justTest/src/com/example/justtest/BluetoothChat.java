@@ -451,8 +451,9 @@ public class BluetoothChat extends Activity  {
 		        String username = viewuname.getText().toString();                
 		        String password = viewpwd.getText().toString();
 		        passwordHash= GetSHAHash(password);
-		        String encryptedText=encrypt(MSG_USERNAME+MSG_SEP_COLON+ username, passwordHash);
-		        sendMessage(encryptedText);		        
+		        //String encryptedText=encrypt(MSG_USERNAME+MSG_SEP_COLON+ username, passwordHash);
+		        String initialMsg=MSG_USERNAME+MSG_SEP_COLON+ username;
+		        sendMessage(initialMsg);		        
 		        viewuname.setEnabled(false);
 		        viewpwd.setEnabled(false);
 		        mConnect.setVisibility(View.GONE);

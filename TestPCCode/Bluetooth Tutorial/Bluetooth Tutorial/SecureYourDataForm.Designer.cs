@@ -102,7 +102,7 @@
             // lblDeviceName
             // 
             this.lblDeviceName.AutoSize = true;
-            this.lblDeviceName.Location = new System.Drawing.Point(21, 72);
+            this.lblDeviceName.Location = new System.Drawing.Point(5, 72);
             this.lblDeviceName.Name = "lblDeviceName";
             this.lblDeviceName.Size = new System.Drawing.Size(110, 13);
             this.lblDeviceName.TabIndex = 1;
