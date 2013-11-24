@@ -64,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_weight="1.90" />
+            android:layout_weight="1.79" />
     </LinearLayout>
 
     <LinearLayout
@@ -85,7 +85,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_weight="1" />
+            android:layout_weight="0.95"
+            android:inputType="textPassword" />
+
     </LinearLayout>
 
     <LinearLayout

@@ -226,7 +226,8 @@ public class BluetoothChat extends Activity  {
 
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
-        
+        viewuname = (TextView) findViewById(R.id.edit_username);
+        viewpwd = (TextView) findViewById(R.id.edit_password);
 
     }
     
@@ -328,7 +329,8 @@ public class BluetoothChat extends Activity  {
                     break;
                 case BluetoothChatService.STATE_LISTEN:
                 case BluetoothChatService.STATE_NONE:
-                    setStatus(R.string.title_not_connected);
+                    setStatus(R.string.title_not_connected);   
+                    SetInitialDisplay();
                     break;
                 }
                 break;
@@ -446,8 +448,6 @@ public class BluetoothChat extends Activity  {
 	    	if(IsConnectedToServer())
 	    	{
 	    		sessionKey=null;
-		        viewuname = (TextView) findViewById(R.id.edit_username);
-		        viewpwd = (TextView) findViewById(R.id.edit_password);
 		        String username = viewuname.getText().toString();                
 		        String password = viewpwd.getText().toString();
 		        passwordHash= GetSHAHash(password);
@@ -477,11 +477,18 @@ public class BluetoothChat extends Activity  {
     	
     	if(mChatService!=null)
     		mChatService.stop();
+    	SetInitialDisplay();
+    }
+    
+    private void SetInitialDisplay()
+    {
         mConnect.setVisibility(View.VISIBLE);
         mDisconnect.setVisibility(View.GONE);
         viewuname.setEnabled(true);
+        viewuname.setText("");
         viewpwd.setEnabled(true);
-        UpdateMessage("Device disconnected");
+        viewpwd.setText("");
+        UpdateMessage("Please start a new session");
     }
     
     public  void ProcessServerCall(String message)

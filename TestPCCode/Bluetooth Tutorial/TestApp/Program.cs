@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.IO;
 
 namespace TestApp
 {
@@ -13,6 +14,7 @@ namespace TestApp
         static void Main(string[] args)
         {
             //GUID();
+            /*
             for (int i = 0; i < 50; i++)
             {
                 StartTimer();
@@ -23,6 +25,36 @@ namespace TestApp
 
                 Console.WriteLine("Press the Enter key to end the program.");
             Console.ReadLine();
+             * */
+            try
+            {
+                Program p = new Program();
+              //  p.testDec();
+                p.testEnc();
+               // var Files = Directory.EnumerateFiles(@"E:\EMDC_IST\SEMESTER_1\SIRS-Computer_Security\PROJECT\TEST\new", "*.aes", SearchOption.AllDirectories);
+                //CheckOpen.check();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message+"----"+ex.StackTrace);
+            }
+        }
+
+        public void testEnc()
+        {
+            sirsCryptClass s = new sirsCryptClass();
+            String dir = @"E:\EMDC_IST\SEMESTER_1\SIRS-Computer_Security\PROJECT\TEST\GAYANA";
+
+            s.EncryptDirectory(dir, "cf6fc152d377f880ec593d011d07d07970d6a3b6");
+            Console.WriteLine("Done");
+        }
+        public void testDec()
+        {
+            sirsCryptClass s = new sirsCryptClass();
+            String dir = @"E:\EMDC_IST\SEMESTER_1\SIRS-Computer_Security\PROJECT\TEST\GAYANA";
+
+            s.DecryptDirectory(dir, "cf6fc152d377f880ec593d011d07d07970d6a3b6");
+            Console.WriteLine("Done");
         }
 
         public static void StartTimer()
