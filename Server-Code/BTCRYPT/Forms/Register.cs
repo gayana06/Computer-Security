@@ -25,7 +25,8 @@ namespace Bluetooth_Tutorial
         private const string MSG_PASSWORD_DESCRIPTION = "Password should have at least 8 characters.\nAt least one lowercase, one upper case, \none digit and one special character.";
         private const string MSG_NEWUSER_ADDED = "New user added to the system successfully.";
         private const string MSG_USERNAME_ALREADY_EXISTS = "The username exists, please give a new username";
-        private const string MSG_PASSWORD_MISMATCH = "Password and Re-entered passwords do not match";        
+        private const string MSG_PASSWORD_MISMATCH = "Password and Re-entered passwords do not match";
+        private const string MSG_SELECT_A_EMPTY_FOLDER = "Please select an empty folder";
         private const string REGX_PASSWORD = "^((?=(.*\\d))(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z\\d])).{8,20}$";
         private const string REGX_USERNAME = "^([a-zA-Z0-9]).{5,10}$";
         private const string TIP_CORRECT = "Correct";
@@ -56,6 +57,7 @@ namespace Bluetooth_Tutorial
                 string password = tbxPass.Text.Trim();
                 string reenteredPassword = tbxRePassword.Text.Trim();
                 string folderPath = tbxPath.Text.Trim();
+                
                 if (ValidateInput(username, password, reenteredPassword, folderPath))
                 {
                     User newuser = new User();
@@ -108,6 +110,10 @@ namespace Bluetooth_Tutorial
             {
                 ShowMsg(MSG_ENTER_VALID_FOLDER);
             }
+            else if(!Util.IsFolderEmpty(folderPath))
+            {
+                ShowMsg(MSG_SELECT_A_EMPTY_FOLDER);
+            }
             else
             {
                 if (!Regex.IsMatch(password, REGX_PASSWORD))
@@ -140,7 +146,7 @@ namespace Bluetooth_Tutorial
         {
             DialogResult result = dialogFolderBrowse.ShowDialog();
             if (result == DialogResult.OK)
-            {
+            {                
                 tbxPath.Text = dialogFolderBrowse.SelectedPath;                
             }
         }

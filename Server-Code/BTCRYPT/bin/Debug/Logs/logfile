@@ -237,3 +237,48 @@ Object name: 'System.Net.Sockets.NetworkStream'.,Server Restarted,System
 2013-11-30 01:20:08,416 [1] INFO  Folder encryption started,,
 2013-11-30 01:20:15,300 [7] INFO  Files encrypted successfully,,
 2013-11-30 01:20:15,301 [1] INFO  Folder encryption finished,,
+2013-11-30 01:54:15,825 [1] ERROR User registration failed.,Access to the path 'E:\EMDC_IST\SEMESTER_1\SIRS-Computer_Security\PROJECT\VS\Bluetooth Tutorial\Bluetooth Tutorial\Bluetooth Tutorial\bin\Debug\userdata\users.xml' is denied.,mscorlib
+2013-11-30 01:54:21,498 [1] ERROR User registration failed.,Access to the path 'E:\EMDC_IST\SEMESTER_1\SIRS-Computer_Security\PROJECT\VS\Bluetooth Tutorial\Bluetooth Tutorial\Bluetooth Tutorial\bin\Debug\userdata\users.xml' is denied.,mscorlib
+2013-11-30 01:56:22,371 [1] INFO  New user registered successfully.,,
+2013-11-30 01:57:49,037 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 01:57:49,037 [3] INFO  --------------------------,--START OF SESSION--,--------------------------
+2013-11-30 01:57:49,037 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 01:57:49,062 [3] INFO  Client Connected,Machine Name: gayana, Endpoint: D0516298A56D:1,
+2013-11-30 01:58:13,655 [3] INFO  Session key generated.,,
+2013-11-30 01:58:13,717 [3] INFO  Authentication successful.,,
+2013-11-30 01:58:13,760 [3] INFO  Folder decryption started,,
+2013-11-30 01:58:13,763 [5] INFO  Files decrypted successfully,,
+2013-11-30 01:58:13,763 [3] INFO  Folder decryption finished,,
+2013-11-30 01:59:30,206 [3] ERROR Disconnected,Server Restarted,Unable to write data to the transport connection: An established connection was aborted by the software in your host machine.--System
+2013-11-30 01:59:30,208 [3] INFO  Folder encryption started,,
+2013-11-30 01:59:31,456 [7] INFO  Files encrypted successfully,,
+2013-11-30 01:59:31,456 [3] INFO  Folder encryption finished,,
+2013-11-30 01:59:31,462 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 01:59:31,462 [3] INFO  --------------------------,---END OF SESSION---,--------------------------
+2013-11-30 01:59:31,462 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 01:59:31,462 [3] INFO  ,,
+2013-11-30 01:59:31,462 [3] INFO  ,,
+2013-11-30 01:59:39,843 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 01:59:39,843 [3] INFO  --------------------------,--START OF SESSION--,--------------------------
+2013-11-30 01:59:39,843 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 01:59:39,854 [3] INFO  Client Connected,Machine Name: gayana, Endpoint: D0516298A56D:2,
+2013-11-30 01:59:55,211 [3] INFO  Authentication failed,Incorrect Password,
+2013-11-30 01:59:55,217 [3] ERROR Disconnected,Server Restarted,Wrong message from mobile--Bluetooth Tutorial
+2013-11-30 01:59:55,228 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 01:59:55,228 [3] INFO  --------------------------,---END OF SESSION---,--------------------------
+2013-11-30 01:59:55,228 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 01:59:55,228 [3] INFO  ,,
+2013-11-30 01:59:55,228 [3] INFO  ,,
+2013-11-30 02:00:28,519 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 02:00:28,519 [3] INFO  --------------------------,--START OF SESSION--,--------------------------
+2013-11-30 02:00:28,519 [3] INFO  ---------------------------------------------------------------------------------,,
+2013-11-30 02:00:28,529 [3] INFO  Client Connected,Machine Name: gayana, Endpoint: D0516298A56D:1,
+2013-11-30 02:00:31,433 [3] INFO  Session key generated.,,
+2013-11-30 02:00:31,515 [3] INFO  Authentication successful.,,
+2013-11-30 02:00:31,556 [3] INFO  Folder decryption started,,
+2013-11-30 02:00:32,967 [6] INFO  Files decrypted successfully,,
+2013-11-30 02:00:32,967 [3] INFO  Folder decryption finished,,
+2013-11-30 02:00:44,647 [1] INFO  Folder encryption started,,
+2013-11-30 02:00:45,747 [8] INFO  Files encrypted successfully,,
+2013-11-30 02:00:45,747 [1] INFO  Folder encryption finished,,
+2013-11-30 02:27:48,265 [1] INFO  New user registered successfully.,,

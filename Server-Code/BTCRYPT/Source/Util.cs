@@ -252,6 +252,18 @@ namespace Bluetooth_Tutorial
         }
 
         /// <summary>
+        /// Check the specific folder is empty
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static bool IsFolderEmpty(string path)
+        {
+            bool isEmpty = false;
+            isEmpty = (Directory.GetDirectories(path).Length>0 || Directory.GetFiles(path).Length > 0) ? false : true;
+            return isEmpty;
+        }
+
+        /// <summary>
         /// Print the header and footer of log files
         /// </summary>
         /// <param name="isHeader"></param>
