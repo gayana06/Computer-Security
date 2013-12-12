@@ -157,6 +157,7 @@ namespace Bluetooth_Tutorial
                 fsCrypt.Close();
                 Util.DeleteFile(inputFile);
                 isEncrypted = true;
+                
             }
             catch (Exception ex)
             {

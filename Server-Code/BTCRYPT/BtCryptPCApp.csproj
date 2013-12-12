@@ -8,8 +8,8 @@
     <ProjectGuid>{2F5AFAAB-E662-4825-B87E-5CC8D9641CC7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bluetooth_Tutorial</RootNamespace>
-    <AssemblyName>Bluetooth Tutorial</AssemblyName>
+    <RootNamespace>BTCRYPT</RootNamespace>
+    <AssemblyName>BTCRYPT</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>

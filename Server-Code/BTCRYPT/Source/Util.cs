@@ -285,6 +285,48 @@ namespace Bluetooth_Tutorial
             }
 
         }
+
+        /// <summary>
+        /// Hide the file
+        /// </summary>
+        /// <param name="path"></param>
+        public static void Hide_directory(string path) //path is the directory path
+        {
+            FileAttributes attributes = File.GetAttributes(path);
+            //check if the file is a directory
+            if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                // Hide the directory.
+                File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden);
+            }
+        }
+
+        /// <summary>
+        /// Unhide the file
+        /// </summary>
+        /// <param name="path"></param>
+        public static void Unhide_directory(string path) //path is the directory path
+        {
+            FileAttributes attributes = File.GetAttributes(path);
+            //check if the file is a directory
+            if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                // Unhide the directory.
+                File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.Hidden);
+            }
+        }
+
+        public static void StartupEncryption()
+        {
+            List<User> userList= LoadUserList();
+            if (userList != null && userList.Count > 0)
+            {
+                foreach(User user in userList)
+                {
+                    Crypto.EncryptDirectory(user.FolderPath, user.PasswordHash);
+                }
+            }
+        }
         #endregion
     }
 }

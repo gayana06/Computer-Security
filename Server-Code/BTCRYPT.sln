@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BtCryptPCApp", "Bluetooth Tutorial\BtCryptPCApp.csproj", "{2F5AFAAB-E662-4825-B87E-5CC8D9641CC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BtCryptPCApp", "BTCRYPT\BtCryptPCApp.csproj", "{2F5AFAAB-E662-4825-B87E-5CC8D9641CC7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{02F01C43-D411-467F-AE07-47103EE8D5C7}"
 EndProject

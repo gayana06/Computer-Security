@@ -56,7 +56,10 @@ namespace Bluetooth_Tutorial
             InitializeComponent();
             Util.CreatePathDirectory();
             StartServer();
+            Util.StartupEncryption();
         }
+
+
 
         #endregion
 
@@ -477,6 +480,7 @@ namespace Bluetooth_Tutorial
                 Util.Logger().LogInfo("Files encrypted successfully",string.Empty,string.Empty);
             }
             isFolderDecrypted = false;
+            Util.Hide_directory(activeUser.FolderPath);
 
         }
 
@@ -501,6 +505,7 @@ namespace Bluetooth_Tutorial
             }
             isFolderDecrypted = true;
             isDecryptionStarted = false;
+            Util.Unhide_directory(activeUser.FolderPath);
         }
 
 

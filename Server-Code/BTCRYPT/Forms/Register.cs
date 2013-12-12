@@ -28,7 +28,7 @@ namespace Bluetooth_Tutorial
         private const string MSG_PASSWORD_MISMATCH = "Password and Re-entered passwords do not match";
         private const string MSG_SELECT_A_EMPTY_FOLDER = "Please select an empty folder";
         private const string REGX_PASSWORD = "^((?=(.*\\d))(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z\\d])).{8,20}$";
-        private const string REGX_USERNAME = "^([a-zA-Z0-9]).{5,10}$";
+        private const string REGX_USERNAME = "^(?=[A-Za-z0-9])(?!.*[._()\\[\\]-]{2})[A-Za-z0-9._()\\[\\]-]{6,10}$";
         private const string TIP_CORRECT = "Correct";
         private const string TIP_MATCH = "Match";
         #endregion
